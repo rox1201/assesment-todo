@@ -1,0 +1,18 @@
+server: https://192.168.100.24:6443
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: kubernetes-admin
+  name: kubernetes-admin@kubernetes
+current-context: kubernetes-admin@kubernetes
+kind: Config
+preferences: {}
+users:
+- name: kubernetes-admin
+  user:
+
+kubectl --kubeconfig=/home/roxana/.kube/config cluster-info
+
+Kubernetes master is running at https://192.168.100.24:6443
+KubeDNS is running at https://192.168.100.24:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
