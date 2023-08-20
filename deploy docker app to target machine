@@ -1,0 +1,44 @@
+- name: Deploy Todo Application
+  hosts: 192.168.100.26
+  become: yes
+  
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start Docker service
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Pull Docker Image
+      docker_image:
+        name: roxart/todo
+        tag: latest
+        source: pull
+
+    - name: Create Docker Network
+      docker_network:
+        name: todo_app_network
+        state: present
+
+    - name: Run MySQL Container
+      docker_container:
+        name: todo-app-mysql
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: example
+        networks:
+          - name: todo_app_network
+
+    - name: Run Todo Application Container
+      docker_container:
+        name: todo-app
+        image: roxart/todo
+        ports:
+          - "3000:3000"
+        networks:
+          - name: todo_app_network
