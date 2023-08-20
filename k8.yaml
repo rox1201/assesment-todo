@@ -1,6 +1,6 @@
 --
-- hosts: localhost
-  remote_user: roxana
+- hosts: [target_machine]
+  remote_user: target
   become: yes
   become_method: sudo
   become_user: root
