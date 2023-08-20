@@ -1,0 +1,57 @@
+---
+- name: Install Nginx Ingress Controller
+  hosts: localhost
+  become: yes
+
+  tasks:
+    - name: Add Nginx Ingress Controller repository
+      apt_repository:
+        repo: deb http://nginx.org/packages/mainline/debian/ {{ ansible_distribution_release }} nginx
+        state: present
+
+    - name: Add Nginx signing key
+      apt_key:
+        url: https://nginx.org/keys/nginx_signing.key
+        state: present
+
+    - name: Install Nginx Ingress Controller
+      apt:
+        name: nginx-ingress-controller
+        state: present
+
+- name: Configure Nginx Ingress Controller
+  hosts: localhost # Replace with your target hosts
+  become: yes
+
+  tasks:
+    - name: Create namespace for Nginx Ingress Controller
+      k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: ingress-nginx
+
+    - name: Apply Nginx Ingress Controller manifest
+      k8s:
+        state: present
+        namespace: ingress-nginx
+        definition: /home/roxana/nginx-ingress-controller.yaml 
+
+    - name: Wait for Nginx Ingress Controller pods to be ready
+      k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        namespace: ingress-nginx
+        label_selectors: app=nginx-ingress-controller
+      register: nginx_ingress_controller
+
+    - name: Pause for Nginx Ingress Controller pods to be ready
+      pause:
+        seconds: 10
+
+    - name: Print Nginx Ingress Controller pod details
+      debug:
+        var: nginx_ingress_controller.resources[0].items[0].status.conditions[0].type
+        verbosity: 2
